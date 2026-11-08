@@ -213,4 +213,30 @@ class KeystoneThemeHooks extends Gdn_Plugin {
 
         $sender->render();
     }
+
+    /**
+     * Show the register IP and last IP in the profile overview for users allowed to see personal info
+     * (moderators). The CustomProfileFields layout dropped them from the "About" box.
+     *
+     * @param array $overviewData
+     * @param mixed $module
+     * @param object|array $user
+     *
+     * @return array
+     */
+    public function userInfo_overview_handler($overviewData, $module = null, $user = null) {
+        if (!$user || !Gdn::session()->checkPermission('Garden.PersonalInfo.View')) {
+            return $overviewData;
+        }
+
+        foreach (['InsertIPAddress' => 'Register IP', 'LastIPAddress' => 'Last IP'] as $field => $label) {
+            $ip = val($field, $user);
+            $overviewData[] = [
+                'key' => t($label),
+                'value' => $ip ? ipDecode($ip) : t('n/a'),
+            ];
+        }
+
+        return $overviewData;
+    }
 }
